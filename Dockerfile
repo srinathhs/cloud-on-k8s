@@ -22,16 +22,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
 			-o elastic-operator github.com/elastic/cloud-on-k8s/cmd
 
 # Copy the controller-manager into a thin image
-FROM centos:7
-
-RUN set -x \
-    && groupadd --system --gid 101 elastic \
-    && useradd --system -g elastic -m --home /eck -c "eck user" --shell /bin/false --uid 101 elastic \
-    && chmod 755 /eck
-
-WORKDIR /eck
-USER 101
-
-COPY --from=builder /go/src/github.com/elastic/cloud-on-k8s/elastic-operator .
+FROM gcr.io/distroless/base-debian10
+COPY --from=builder /go/src/github.com/elastic/cloud-on-k8s/elastic-operator /
 ENTRYPOINT ["./elastic-operator"]
 CMD ["manager"]
